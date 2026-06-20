@@ -6,19 +6,23 @@
 [![GitHub release](https://img.shields.io/github/v/release/Ceki-me/realbrowser-skill)](https://github.com/Ceki-me/realbrowser-skill/releases)
 [![Discussions](https://img.shields.io/github/discussions/Ceki-me/realbrowser-skill)](https://github.com/Ceki-me/realbrowser-skill/discussions)
 
-> **Give your AI agent a human disguise.**
+> **Real Chrome sessions for AI agents** — for tasks where headless or scripted requests aren't enough.
 >
-> Real Chrome from real humans. Defeats Cloudflare, DataDome, BasedFlare, Imperva, PerimeterX, Akamai.
+> Use on sites you own or have authorization to operate on (your own QA flows, accessibility audits of your own sites, synthetic monitoring, support automation in your own dashboards, public data within site Terms of Service).
 
-Anti-bot vendors fingerprint your AI agent in milliseconds — Canvas, WebGL, JA3/JA4 TLS, mouse patterns, IP ASN. Headless browsers and datacenter proxies fail every check.
+This is a thin client to the `ceki-sdk` CLI / Python SDK. It lets your AI agent open a real Chrome session and drive it — yours via the [Ceki extension](https://browser.ceki.me/install), or one rented from another opted-in user via the marketplace.
 
-This skill plugs your OpenClaw / Claude Desktop / Cursor / Cline agent into a **real Chrome on a real device**:
+## Three modes
 
-- **Self mode** — use your OWN Chrome after installing the [Ceki extension](https://browser.ceki.me/install). **Free** when host_user == renter_user.
-- **Marketplace mode** — rent Chrome from a real human host worldwide. **$0.01/min**, settled in USDC.
-- **Earn mode** (opt-in) — share your idle Chrome → other agents pay you. **90% revenue share** to you.
+| Mode | Where | Cost | Visibility |
+|---|---|---|---|
+| **Self** | Your own Chrome (Ceki extension) | Free for host_user == renter_user | Only you |
+| **Marketplace** | Chrome contributed by another user who opted in to host | $0.01/min, USDC | The host can see your session |
+| **Earn** (opt-in, off) | Your idle Chrome contributed back | 90% of session price | Other agents you allow |
 
-No SaaS. No datacenter proxies. No fingerprint spoofing libraries that break next week.
+## Use responsibly
+
+Use this skill only on sites where you have authorization (your own, public data within site Terms of Service, accessibility audits you are responsible for, customer support on behalf of your own users with their consent). See `SKILL.md` for appropriate and inappropriate use cases.
 
 ## Install
 
@@ -34,30 +38,25 @@ pip install --upgrade ceki-sdk --break-system-packages
 
 ## Get API key
 
-1. Sign up at [ceki.me](https://ceki.me) — email only, no KYC
+1. Sign up at [ceki.me](https://ceki.me) — email only
 2. Dashboard → API keys → create one
-3. Export:
+3. Export when ready to use:
 
 ```bash
 export CEKI_API_KEY="your_key_here"
 ```
 
+The skill does **not** transmit your API key during installation. Token verification is a separate, manual step.
+
 ## Quickstart
 
 ```bash
-# discover available browsers
 ceki search --limit 5
-
-# rent one
 SID=$(ceki rent --schedule <schedule_id> | jq -r .session_id)
-
-# drive it
-ceki navigate $SID https://example.com
+ceki navigate $SID https://my-app.example.com
 ceki snapshot $SID -o /tmp/01.png
 ceki click $SID 400 300
-ceki type $SID "hello world"
-
-# stop
+ceki type $SID "hello"
 ceki stop $SID
 ```
 

@@ -1,39 +1,31 @@
-# ClawHub listing copy
-
-For submission to clawhub.ai listing.
-
----
+# ClawHub listing copy (v0.1.1)
 
 ## Title (max ~60 chars)
-**RealBrowser by Ceki — Give your AI agent a human disguise**
+**RealBrowser by Ceki — real Chrome sessions for AI agents**
 
 ## Subtitle (~120 chars)
-**Real Chrome from real humans. Defeats Cloudflare, DataDome, BasedFlare. Free for your own. $0.01/min marketplace.**
+**Drive a real Chrome from your agent. Self mode (your own) is free, marketplace mode is $0.01/min in USDC.**
 
 ## Short description (~200 chars)
-Plug your AI agent into a real residential Chrome — your own (free) or rented from real human hosts ($0.01/min, USDC). Real IP, real fingerprint, real history. Sites can't tell.
+A thin client to the ceki-sdk CLI. Lets your AI agent open a real Chrome session — yours or one rented from another opted-in user — for tasks on sites you have authorization to operate on.
 
 ## Long description (markdown allowed)
 
-Anti-bot defeats your AI agent? Cloudflare, DataDome, BasedFlare, Imperva, PerimeterX, Akamai — all of them flag headless browsers, datacenter IPs, and fake fingerprints in milliseconds.
+RealBrowser by Ceki is a ClawHub skill that lets your AI agent drive a real Chrome session through the [ceki-sdk](https://pypi.org/project/ceki-sdk/) CLI.
 
-This skill plugs your OpenClaw / Claude Desktop / Cursor / Cline agent into a **real Chrome on a real device**:
-
-- **Real residential ISP IP** (not datacenter)
-- **Real canvas/WebGL/font/audio fingerprint** (matches a real device)
-- **Real session history and cookies**
-- **Real mouse acceleration patterns** (from actual host hardware)
-- **Real timezone, real language, real OS**
-
-Sites can't tell your agent apart from a person. Because, mechanically, the request IS coming from a real person's machine.
+Use it for tasks on sites where you have authorization to operate: your own web apps (QA / E2E testing), accessibility audits of sites you're responsible for, synthetic monitoring of your own services, customer-support automation in your own dashboards, public-data extraction within site Terms of Service.
 
 ### Three modes
 
 | Mode | Where | Cost |
 |---|---|---|
-| **Self** | Your OWN Chrome, after installing the [Ceki extension](https://browser.ceki.me/install) | FREE when host_user == renter_user |
-| **Marketplace** | Real Chrome rented from real human hosts worldwide | $0.01/min, USDC |
-| **Earn** (opt-in) | Share your idle Chrome → agents rent → you get USDC | 90% to you |
+| **Self** | Your OWN Chrome (after installing the [Ceki extension](https://browser.ceki.me/install)) | FREE when host_user == renter_user |
+| **Marketplace** | A Chrome contributed by another user who opted in to host | $0.01/min, settled in USDC |
+| **Earn** (opt-in, off by default) | Your idle Chrome contributed back to the marketplace | You receive 90% of session price |
+
+### Use responsibly
+
+This skill enables real-browser automation. Use only on sites you own or have authorization to operate on. Do not use for tasks you would not be allowed to perform manually, do not violate site Terms of Service, and respect `robots.txt`. The skill does not enable anything you wouldn't be allowed to do manually — it just makes legitimate browser-based agent workflows feasible without the friction of a headless setup.
 
 ### Install
 
@@ -41,32 +33,32 @@ Sites can't tell your agent apart from a person. Because, mechanically, the requ
 clawhub skill install realbrowser
 ```
 
-### Get API key
-
-1. Sign up at [ceki.me](https://ceki.me) — email only, no KYC
-2. Dashboard → API keys → create one
-3. Export: `export CEKI_API_KEY="your_key_here"`
-
 ### Use
 
 ```bash
 SID=$(ceki rent --schedule <schedule_id> | jq -r .session_id)
-ceki navigate $SID https://example.com
+ceki navigate $SID https://my-app.example.com
 ceki snapshot $SID -o /tmp/01.png
 ceki click $SID 400 300
 ceki type $SID "hello"
 ceki stop $SID
 ```
 
-No SaaS. No datacenter proxies. No fingerprint spoofing libraries that break next week. Just real Chrome on real devices, paid by the minute in USDC.
+### What this skill is NOT
+
+- Not a tool for account creation on third-party services
+- Not a tool for circumventing site protections you don't have authorization to bypass
+- Not a stealth or anti-detection library
+
+It is a thin client over a real-browser marketplace. Real browsers behave like real browsers because they are real browsers.
 
 ---
 
 ## Tags / keywords
-`browser`, `automation`, `ai-agent`, `anti-bot`, `residential`, `chrome`, `scraping`, `cloudflare`, `datadome`, `marketplace`, `mcp`, `usdc`, `web3`
+`browser`, `automation`, `ai-agent`, `chrome`, `qa`, `synthetic-monitoring`, `accessibility`, `marketplace`, `mcp`, `openclaw`
 
 ## Category
-`browser` / `automation` / `marketplace`
+`browser` / `automation`
 
 ## License
 MIT
@@ -77,20 +69,23 @@ iWedmak (GitHub)
 ## Links
 - Homepage: https://ceki.me
 - Repo: https://github.com/Ceki-me/realbrowser-skill
-- Docs: https://ceki.me (TBD `/docs` or `/for-agents`)
+- Mirror (Codeberg): https://codeberg.org/cekibrowser/realbrowser-skill
 - Issues: https://github.com/Ceki-me/realbrowser-skill/issues
 - PyPI: https://pypi.org/project/ceki-sdk/
 
-## Permissions to declare (per ClawHub post-ClawHavoc policy)
-- `network.outbound`: api.ceki.me, browser.ceki.me, chat.ceki.me
-- `process.spawn`: node, python3, ceki
-- `filesystem.read`: ~/.ceki/sessions/
-- `filesystem.write`: ~/.ceki/sessions/, /tmp/
+## Permissions declared
+- `network.outbound`: api.ceki.me, browser.ceki.me, chat.ceki.me only
+- `process.spawn`: `ceki` CLI binary only
+- `filesystem.read`: `~/.ceki/sessions/`
+- `filesystem.write`: `~/.ceki/sessions/`
 
-## Why this skill is safe (for ClawHavoc reviewers)
-- Open source (MIT, github.com/Ceki-me/realbrowser-skill)
-- No credential transmission — auth via single API key the user generates
-- No filesystem writes outside ~/.ceki and /tmp
-- Network outbound limited to ceki.me subdomains (declared)
-- No process spawn beyond ceki CLI invocation
-- Self-mode does NOT transmit user's Chrome data to third parties (only routing through Ceki dispatcher for agent task execution)
+## Why this skill is safe (compliance notes)
+
+- **Open source** (MIT, github.com/Ceki-me/realbrowser-skill, Codeberg mirror)
+- **No credential transmission during install** — install.sh installs the CLI and exits. The user generates and exports the API key separately, when ready to use.
+- **No filesystem writes outside ~/.ceki/sessions/** — session state files only
+- **Network outbound limited to ceki.me subdomains** (declared in manifest)
+- **No process spawn beyond ceki CLI**
+- **Self mode** does not transmit user's Chrome data to third parties — sessions are routed through Ceki's dispatcher only for agent task execution, and the server is stateless between rentals (cookies and storage live inside the rented Chrome and are discarded on session end)
+- **Marketplace mode** explicitly warns that the host can see the session, with guidance to use Self mode for sensitive workflows
+- **Earn mode** is off by default, opt-in, and runs in a sandboxed Chrome profile (other agents who rent your Chrome cannot see your other tabs, saved passwords, or local files)
