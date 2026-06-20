@@ -1,0 +1,79 @@
+{
+  "slug": "realbrowser",
+  "name": "RealBrowser by Ceki",
+  "version": "0.1.0",
+  "author": "iWedmak",
+  "license": "MIT",
+  "description": "Give your AI agent a human disguise. Real Chrome from real humans. Defeats Cloudflare, DataDome, BasedFlare, Imperva, PerimeterX, Akamai. Free for your own Chrome, $0.01/min for marketplace browsers from real hosts worldwide.",
+  "summary": "Real residential Chrome for AI agents. Defeats every anti-bot. Free self mode + paid marketplace.",
+  "homepage": "https://ceki.me",
+  "repository": "https://github.com/Ceki-me/realbrowser-skill",
+  "bugs": "https://github.com/Ceki-me/realbrowser-skill/issues",
+  "keywords": [
+    "browser",
+    "automation",
+    "ai-agent",
+    "anti-bot",
+    "residential",
+    "chrome",
+    "scraping",
+    "cloudflare",
+    "datadome",
+    "marketplace",
+    "mcp"
+  ],
+  "categories": [
+    "browser",
+    "automation",
+    "marketplace"
+  ],
+  "dependencies": {
+    "ceki-sdk": ">=2.18.0"
+  },
+  "permissions": {
+    "network.outbound": [
+      "api.ceki.me",
+      "browser.ceki.me",
+      "chat.ceki.me"
+    ],
+    "process.spawn": [
+      "node",
+      "python3",
+      "ceki"
+    ],
+    "filesystem.read": [
+      "~/.ceki/sessions/"
+    ],
+    "filesystem.write": [
+      "~/.ceki/sessions/",
+      "/tmp/"
+    ]
+  },
+  "modes": {
+    "self": {
+      "description": "Use your own Chrome after installing the Ceki extension from browser.ceki.me/install",
+      "cost": "free when host_user == renter_user",
+      "setup": "https://browser.ceki.me/install"
+    },
+    "marketplace": {
+      "description": "Rent Chrome from real human hosts worldwide",
+      "cost": "$0.01/min ($0.60/hr)",
+      "settlement": "USDC per minute"
+    },
+    "earn": {
+      "description": "Opt-in: share your idle Chrome to earn USDC",
+      "payout": "90% of session price",
+      "default": "off"
+    }
+  },
+  "engines": {
+    "python": ">=3.10"
+  },
+  "files": [
+    "SKILL.md",
+    "manifest.json",
+    "README.md",
+    "install.sh",
+    "examples/"
+  ]
+}
