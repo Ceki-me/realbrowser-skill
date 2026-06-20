@@ -450,15 +450,18 @@ asyncio.run(main())
 
 ### Anti-detect — what's on by default
 
-| Layer | Status | Control |
-|---|---|---|
-| Humanizer (pauses between actions + char-by-char typing) | ✅ default ON | `client.rent(human="natural"|"careful"|None)` |
-| anti-bot handling stealth (`navigator.webdriver`, `cdc_*` cleanup, integrity, pre-nav delay) | ✅ default ON | automatic at session start |
-| anti-bot handling mouse jitter (Bezier-trajectory mouseMoved) | ✅ default ON | `client.rent(masking_mode=False)` or `await browser.configure(masking_mode=False)` |
-| anti-bot handling per-session fingerprint alteration (UA, locale, TZ, geolocation ±0.03°, screen, navigator, hwConcurrency, Canvas/WebGL/Audio/mediaDevices/voices) | ✅ default ON | per-session seeded |
-| anti-bot handling (full device spoof) | ⛔ by design no | real-user browser = the value prop |
+Built-in anti-bot evasion is **ON by default** for every rental. It defeats Cloudflare, DataDome, BasedFlare, Imperva, PerimeterX, Akamai across most flows. No configuration needed — just `rent` and go.
 
-JS/TS SDK doesn't have `human=` / `configure(masking_mode)` / `resume()` (Python only). Anti-bot evasion runs on the extension side — active for js-sdk too.
+Two knobs you can touch:
+
+| Knob | Default | Control |
+|---|---|---|
+| Humanizer (pauses + natural typing rhythm) | ON | `client.rent(human="natural"|"careful"|None)` |
+| Masking mode | ON | `client.rent(masking_mode=False)` or `await browser.configure(masking_mode=False)` |
+
+The rest runs automatically on the extension side. Don't override it unless you understand the implications.
+
+JS/TS SDK doesn't have `human=` / `configure(masking_mode)` / `resume()` (Python only). Anti-bot evasion is active for js-sdk too.
 
 ## Saving and restoring a session
 
