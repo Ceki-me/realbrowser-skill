@@ -1,5 +1,11 @@
 # RealBrowser by Ceki
 
+[![ClawHub](https://img.shields.io/badge/ClawHub-realbrowser-purple)](https://clawhub.ai/skills/realbrowser)
+[![License](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/ceki-sdk?label=ceki-sdk)](https://pypi.org/project/ceki-sdk/)
+[![GitHub release](https://img.shields.io/github/v/release/Ceki-me/realbrowser-skill)](https://github.com/Ceki-me/realbrowser-skill/releases)
+[![Discussions](https://img.shields.io/github/discussions/Ceki-me/realbrowser-skill)](https://github.com/Ceki-me/realbrowser-skill/discussions)
+
 > **Give your AI agent a human disguise.**
 >
 > Real Chrome from real humans. Defeats Cloudflare, DataDome, BasedFlare, Imperva, PerimeterX, Akamai.
