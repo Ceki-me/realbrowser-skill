@@ -298,6 +298,15 @@ curl -s -H "Authorization: Bearer $CEKI_API_KEY" https://api.ceki.me/api/browser
 
 MIT. See `LICENSE`.
 
+## See also
+
+If you're not using an OpenClaw agent, the same Ceki backend is exposed through native integrations for other agent frameworks:
+
+- **LangChain / LangGraph** — install [`langchain-ceki`](https://pypi.org/project/langchain-ceki/) (Python) or [`@ceki/langchain-ceki`](https://www.npmjs.com/package/@ceki/langchain-ceki) (TypeScript). Source: [Ceki-me/langchain](https://github.com/Ceki-me/langchain).
+- **Letta** — install [`letta-ceki`](https://pypi.org/project/letta-ceki/). Comes with `ceki_export_profile` + `ceki_restore_profile` for persistent sessions across agent restarts. Source: [Ceki-me/letta](https://github.com/Ceki-me/letta).
+- **MCP-native clients** (Claude Desktop / Cursor / Cline / Continue, etc.) — point them at the [Ceki MCP server](https://github.com/Ceki-me/mcp-server).
+- **Raw SDK** — [`ceki-sdk`](https://pypi.org/project/ceki-sdk/) (Python + Node) drives the marketplace directly.
+
 ## Links
 
 - [Homepage](https://ceki.me)
@@ -307,3 +316,4 @@ MIT. See `LICENSE`.
 - [ceki-sdk on PyPI](https://pypi.org/project/ceki-sdk/)
 - [Ceki Chrome extension (for Self mode)](https://browser.ceki.me/install)
 - [Issue tracker](https://github.com/Ceki-me/realbrowser-skill/issues)
+
