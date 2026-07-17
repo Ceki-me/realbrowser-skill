@@ -417,6 +417,114 @@ This builds Google cookie history → higher starting score → checkbox captcha
 
 ---
 
+## Behavioural profiles — `profiles/`
+
+The skill ships with a library of behavioural profiles in `profiles/`. These are JSON descriptors that shape **any input timing** — typing speed, scroll rhythm, mouse trajectory, click delays — to look like a specific demographic, or to match the interaction patterns of a specific platform.
+
+### Demographic profiles
+
+Pick one to blend in with a target audience. Pass the filename (without `.json`) as a `human` preset to the SDK.
+
+| Profile | Typing speed | Behaviour |
+|---------|-------------|-----------|
+| `tech-worker-25-40` | 100-145 wpm | Fast, minimal scroll, low think pauses |
+| `executive-35-55` | 70-110 wpm | Deliberate, moderate scroll, formal |
+| `college-male-18-24` | 90-130 wpm | Erratic hours, fast scroll, high backspace |
+| `college-female-18-24` | 85-125 wpm | Night-owl, social-heavy |
+
+And 13 more: `creative-professional`, `freelancer`, `gamer`, `middle-aged-male/female`, `night-shift-worker`, `parent`, `rural-user`, `senior-male/female`, `social-media-power-user`, `student-highschool`, `teen-boys/girls`, `urban-professional-male/female`.
+
+```python
+from ceki_sdk import Browser, HumanProfile
+
+# Load a preset
+profile = HumanProfile.load_preset("tech-worker-25-40")
+
+async with Browser(token="...", human=profile) as br:
+    await br.session(mode="incognito")
+```
+
+### Domain profiles
+
+Each domain profile encodes the interaction patterns of a specific platform — scroll depth, reading pauses, click targets, login flow, and CSS selectors.
+
+| Profile | Domain | Key behaviour |
+|---------|--------|---------------|
+| `domain-twitter` | twitter.com, x.com | Fast timeline scroll, tweet-level pauses, like/reply patterns |
+| `domain-linkedin` | linkedin.com | Slow professional scroll, comment typing, connection clicks |
+| `domain-reddit` | reddit.com | Thread scanning, expand-collapse, vote patterns |
+| `domain-youtube` | youtube.com | Video browsing, search, comment section behaviour |
+| `domain-amazon` | amazon.com | Product search, listing scroll, review reading |
+| `domain-facebook` | facebook.com | News feed scroll, reaction clicks, comment typing |
+| `domain-instagram` | instagram.com | Image-first scroll, story viewing, like patterns |
+| `domain-tiktok` | tiktok.com | Video-first scroll, short attention, fast swipe |
+
+Each domain profile includes `platform_specific` data:
+
+```json
+{
+  "requires_login": true,
+  "login": { "pre_login_pause_ms": 1500, ... },
+  "selectors_css": {
+    "like_button": "[data-testid='like']",
+    "tweet_cell": "[data-testid='cellInnerDiv']"
+  },
+  "sequence_hint": "navigate timeline → scroll 3-5 passes → pause → like | reply → scroll more"
+}
+```
+
+Use these as reference when scripting for a specific platform — the selectors and sequence hints give you the DOM targets and interaction order without reverse-engineering each site.
+
+### Pacing profiles (extension-side)
+
+Separate from the human profiles above, pacing profiles control the **post-navigation pause** the browser extension inserts before the first interaction — invisible to the agent, but critical for anti-bot scoring.
+
+| Profile | Read delay | Scroll segments | Pre-click | When to use |
+|---------|-----------|----------------|-----------|-------------|
+| `minimal` | 200-800ms | 0 | 200-600ms | Speed-critical, low-sensitivity sites |
+| `normal` (default) | 1.5-4s | 2 | 200-600ms | General browsing |
+| `aggressive` | 3-7s | 3 | 300-1000ms | High-sensitivity (banks, Google, Cloudflare) |
+| `random` | — | — | — | Random behaviour, no fixed pattern |
+
+Set via SDK:
+
+```python
+async with Browser(token="...") as br:
+    async with await br.session(
+        mode="incognito",
+        pacing_profile="aggressive"  # ← extension adds 3-7s read before first action
+    ) as s:
+        ...
+```
+
+### Browser search data
+
+When you `ceki search`, each result includes rich metadata for picking the right browser:
+
+```json
+{
+  "schedule_id": 12345,
+  "geo": "US",
+  "language": "en",
+  "rating": 4.8,
+  "price_per_min": 0.03,
+  "domain_allowed": ["*"],
+  "allowed_domains": null,
+  "online": true,
+  "skills": ["scraping", "captcha"]
+}
+```
+
+Filter with `--filter`:
+
+```bash
+ceki search --limit 10 --filter geo=US --filter price_per_min<=0.05
+```
+
+Available filters: `geo`, `language`, `price_per_min`, `rating`, `online`, `profile_mode`, `allowed_domains`.
+
+---
+
 ## Environments — dev vs prod
 
 | | Dev (ittribe) | Prod (default) |
