@@ -1,0 +1,58 @@
+{
+  "id": "domain-reddit",
+  "label": "Reddit — Thread & Comment Browser",
+  "emoji": "🤖",
+  "domain": "reddit.com",
+  "description": "Verified 2026-07-16: new Reddit UI (shreddit). Old reddit selectors deprecated.",
+  "source_patterns": [
+    "Feed: scroll medium-fast, skim titles, pause 2-5s on interesting posts",
+    "Post page: scroll through comments — lazy-loads, requires login to fully render",
+    "'Show more' on long comment chains (old UI): click → 1-2s load → continue",
+    "Vote: click upvote → 200-500ms pause (habitual)",
+    "Search: type → 2-3s → scroll results → click"
+  ],
+  "active_hours": {
+    "description": "All day — peak US evening",
+    "peak": [9, 12, 15, 18, 23],
+    "off_peak_min": 4
+  },
+  "typing": {
+    "wpm": { "min": 70, "max": 110 },
+    "profile": "natural",
+    "think_prob": 0.012,
+    "think_ms": [300, 1500],
+    "backspace_freq": 0.03
+  },
+  "scroll": {
+    "passes": 4,
+    "description": "Feed-style: fast horizontal/vertical scroll, pause on interesting content",
+    "speed_px_per_ms": { "min": 25, "max": 60 },
+    "pause_between_passes_ms": { "min": 1000, "max": 4000 },
+    "depth_per_pass": { "min": 0.3, "max": 0.6 }
+  },
+  "navigation": {
+    "post_navigate_pause_ms": { "min": 1000, "max": 3000 },
+    "pre_click_pause_ms": { "min": 200, "max": 700 },
+    "inter_action_pause_ms": { "min": 300, "max": 1200 },
+    "post_expand_pause_ms": { "min": 1000, "max": 2000 }
+  },
+  "mouse": {
+    "speed": 1.0,
+    "curvature": 0.15,
+    "jitter": 0.3,
+    "description": "Moderate — simple interaction targets"
+  },
+  "platform_specific": {
+    "comment_chain_handling": {
+      "description": "Long threads collapse. New UI (shreddit): comment tree is a WebComponent. Old UI: click 'Show more' / 'Continue this thread'.",
+      "click_strategy": "⚠️ New Reddit uses shreddit WebComponents. DOM selectors differ from old.reddit.com. Login likely required to see comments fully.",
+      "requires_login": true
+    },
+    "selectors_css": {
+      "more_comments_old": "a[role='button']:has-text('more')",
+      "upvote_old": "div[data-click-id='text'] button[aria-label='upvote']",
+      "note": "NEW UI (shreddit) — selectors TBD. Use old.reddit.com for reliable automation."
+    },
+    "sequence_hint": "⚠️ Use old.reddit.com/r/subreddit for reliable automation without login. navigate subreddit/feed → scroll 3-5 passes → click post → wait load → scroll comments → click expand on chains → vote → back → next"
+  }
+}

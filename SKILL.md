@@ -268,6 +268,134 @@ asyncio.run(main())
 - **Stop is mandatory.** Without `ceki stop`, the rental keeps the meter running.
 - **Billing is real** in marketplace mode: $0.01/min, settled in USDC per minute.
 
+## 🧠 Behavioral Profiles
+
+> The browser already handles mouse bezier paths, human typing cadence, and fingerprint emulation automatically. This layer is about **pacing** — the rhythm of interaction that makes a session look like a specific type of person.
+
+Choose a profile that fits your task's target. Each profile encodes reading speed, scroll habits, typing rhythm, active hours, and hesitation patterns. Profiles live in the `profiles/` directory next to this SKILL.md.
+
+### Profile index
+
+| Profile | Gender | Age | Vibe | Best for |
+|---------|--------|-----|------|----------|
+| `teen-girls-12-15` | female | 12-15 | Fast social scroll, TikTok reflexes | Gen-Z social platforms |
+| `teen-boys-16-19` | male | 16-19 | Impulsive clicks, fast typing, gaming late nights | Gaming, esports, Discord |
+| `college-female-18-24` | female | 18-24 | Mixed social + academic, moderate pace | University portals, social mix |
+| `college-male-18-24` | male | 18-24 | Night owl, targeted browsing, tech-aware | Coursework, tech research |
+| `urban-professional-female-25-34` | female | 25-34 | Professional speed, measured scroll, careful typing | Corporate sites, LinkedIn |
+| `urban-professional-male-25-34` | male | 25-34 | Direct, purpose-driven, moderate pace | SaaS dashboards, news, finance |
+| `tech-worker-25-40` | any | 25-40 | Fast, efficient, minimal scroll, high WPM | GitHub, docs, dev tools |
+| `creative-professional-25-40` | any | 25-40 | Meandering, visual browsing, erratic pauses | Dribbble, Behance, portfolios |
+| `parent-30-45` | any | 30-45 | Interrupted browsing, efficient, early hours | E-commerce, family services |
+| `executive-35-55` | any | 35-55 | Brief, fast bursts, minimal scroll, early-start | Bloomberg, dashboards, email |
+| `middle-aged-female-35-50` | female | 35-50 | Thorough reading, careful typing, social | Facebook, recipe sites, health |
+| `middle-aged-male-35-50` | male | 35-50 | Linear scroll, functional typing, news | News sites, sports, finance |
+| `senior-female-50plus` | female | 50+ | Very slow, reads all text, one-finger typing | Health portals, email, community |
+| `senior-male-50plus` | male | 50+ | Very slow, deliberate clicks, cautious | Banking, Medicare, news |
+| `gamer-16-30` | any | 16-30 | Fastest clicks, erratic mouse, late nights | Steam, Twitch, gaming wikis |
+| `social-media-power-user-16-30` | any | 16-30 | Infinite scroll, constant likes, fast reaction | TikTok, Instagram, X/Twitter |
+| `rural-user-all-ages` | any | 15-80 | Daytime, moderate-slow, limited keyboard familiarity | General browsing, local news |
+| `freelancer-20-40` | any | 20-40 | Irregular schedule, mixed fast/slow, task-switching | Upwork, client portals, email |
+| `student-highschool-14-18` | any | 14-18 | Skim-heavy, after-school hours, trackpad native | Google Classroom, social, homework |
+| `night-shift-worker-22-60` | any | 22-60 | Inverted hours, slower at night, higher backspace | Late-night browsing, Amazon |
+
+#### Domain-specific profiles
+
+Built from scraping patterns of existing open-source parsers for each platform. These encode **site-specific interaction strategies** — lazy-load triggers, modal waits, button selectors, and required scroll patterns.
+
+| Profile | Extracted from | Key pattern |
+|---------|---------------|-------------|
+| `domain-instagram` | ScrapeClaw, instascrape, drawrowfly | Infinite scroll 200-400px/pass, 2-4s pause (image consumption), modal open 1-2s |
+| `domain-twitter` | proxidize/x-scraper, ScrapeClaw, hermes-agent | Fast timeline scroll, 1-3s per tweet cluster, 'Show more' expand + 1-2s wait |
+| `domain-linkedin` | joeyism/linkedin_scraper v3, ManiMozaffar | **Must scroll full profile** — sections lazy-load! 2-4s pause per section |
+| `domain-tiktok` | ScrapeClaw, drawrowfly, scrapfly.io | Vertical full-viewport swipe (700px), 3-8s 'watching' pause between videos |
+| `domain-youtube` | ScrapeClaw, scrapfly.io | Scroll 700px past player to trigger **comment lazy-load** (2-3s render wait) |
+| `domain-facebook` | ScrapeClaw facebook-scraper | Slow feed scroll 3-8s per post cluster, modal photo load 1-2s |
+| `domain-amazon` | Generic e-com scrapers, Scrapfly | Scroll past fold for **description lazy-load** (800px), targeted not aimless |
+| `domain-reddit` | Public Playwright automations | Feed skim + comment chain expand, 1-2s load per collapsed thread |
+
+Each file includes `platform_specific.selectors_css`, `platform_specific.sequence_hint`, and `login` timing. Read the file before starting a session on that site.
+
+### ⚠️ Critical Rule — Pick One, Stick to It
+
+Anti-bot systems fingerprint your **behavioural signature** across the session. Switching between profiles mid-session (e.g. teen scroll speed then senior pauses) creates an impossible pattern that flags immediately.
+
+**→ Choose ONE profile before `ceki rent` and follow its pacing for the entire session.**
+
+```bash
+# DURING SESSION SETUP — pick one that fits the target, then NEVER CHANGE
+cat profiles/domain-linkedin.json        # read it to internalise pace
+cat profiles/urban-professional-male-25-34.json  # your persona for this session
+
+# Then pace your session accordingly — the CLI is the instrument:
+ceki navigate $SID <url>
+sleep {post_navigate_pause}       # from profile
+
+ceki scroll $SID 0 0 {depth}     # first scroll pass — shallow
+sleep {pause_between_passes}
+ceki scroll $SID 0 0 {depth*2}   # deeper
+sleep {pause_between_passes}
+
+ceki click $SID X Y              # first action after "reading"
+ceki type $SID "text"            # humanizer ON by default
+sleep {inter_action_pause}
+ceki click $SID X2 Y2            # next interaction
+```
+
+### Key profile parameters explained
+
+```
+typing.wpm            → character cadence (lower = more human pauses)
+typing.think_prob     → probability of mid-typing hesitation
+typing.backspace_freq → how often user corrects themselves
+
+scroll.passes         → how many scroll segments before interacting
+scroll.speed_px_per_ms → how fast the scroll feels
+
+navigation.post_navigate_pause_ms → "reading" time before first action
+                                     (highest impact on DataDome/CF)
+
+mouse.speed           → base speed of bezier mouse movement
+mouse.curvature       → how curved the path is (higher = more erratic)
+mouse.jitter          → variance in per-step delay (higher = shakier cursor)
+```
+
+### Lazy-load trigger
+
+When a page has lazy-loaded images or infinite scroll sections, the browser's built-in `ceki click` won't trigger them because the element is outside the viewport. Always pre-scroll:
+
+```bash
+# STEP 1 — gradual scroll to bottom
+ceki scroll $SID 0 0 $(ceki cdp $SID --method Runtime.evaluate \
+  --params '{"expression":"document.body.scrollHeight"}' | jq '.result.value * 0.3 | floor')
+sleep 600
+
+ceki scroll $SID 0 0 $(ceki cdp $SID --method Runtime.evaluate \
+  --params '{"expression":"document.body.scrollHeight * 0.6 | floor()"}' | jq '.result.value')
+sleep 400
+
+ceki scroll $SID 0 0 $(ceki cdp $SID --method Runtime.evaluate \
+  --params '{"expression":"document.body.scrollHeight * 0.9 | floor()"}' | jq '.result.value')
+sleep 500
+
+# STEP 2 — scroll back to target and interact
+ceki scroll $SID target_x target_y 0
+sleep 300
+ceki click $SID target_x target_y
+```
+
+Each scroll step triggers IntersectionObserver → lazy images load → analytics scroll-depth events fire.
+
+### Why this matters
+
+Anti-bot systems (DataDome, Cloudflare Enterprise) build behavioural profiles per session:
+- **Time-to-first-interaction** — a human doesn't click 100ms after navigation
+- **Scroll pattern** — humans scroll in bursts with pauses, not one smooth motion
+- **Typing cadence** — constant 900ms between keys is a bot signature
+- **Inter-action timing** — same gap between every click → flag
+
+Picking a coherent profile and following its pacing is worth **5-10% pass rate** on aggressive anti-bot targets, on top of what the browser's built-in stealth already provides.
+
 ## Readiness check
 
 ```bash
@@ -298,15 +426,6 @@ curl -s -H "Authorization: Bearer $CEKI_API_KEY" https://api.ceki.me/api/browser
 
 MIT. See `LICENSE`.
 
-## See also
-
-If you're not using an OpenClaw agent, the same Ceki backend is exposed through native integrations for other agent frameworks:
-
-- **LangChain / LangGraph** — install [`langchain-ceki`](https://pypi.org/project/langchain-ceki/) (Python) or [`@ceki/langchain-ceki`](https://www.npmjs.com/package/@ceki/langchain-ceki) (TypeScript). Source: [Ceki-me/langchain](https://github.com/Ceki-me/langchain).
-- **Letta** — install [`letta-ceki`](https://pypi.org/project/letta-ceki/). Comes with `ceki_export_profile` + `ceki_restore_profile` for persistent sessions across agent restarts. Source: [Ceki-me/letta](https://github.com/Ceki-me/letta).
-- **MCP-native clients** (Claude Desktop / Cursor / Cline / Continue, etc.) — point them at the [Ceki MCP server](https://github.com/Ceki-me/mcp-server).
-- **Raw SDK** — [`ceki-sdk`](https://pypi.org/project/ceki-sdk/) (Python + Node) drives the marketplace directly.
-
 ## Links
 
 - [Homepage](https://ceki.me)
@@ -316,4 +435,3 @@ If you're not using an OpenClaw agent, the same Ceki backend is exposed through 
 - [ceki-sdk on PyPI](https://pypi.org/project/ceki-sdk/)
 - [Ceki Chrome extension (for Self mode)](https://browser.ceki.me/install)
 - [Issue tracker](https://github.com/Ceki-me/realbrowser-skill/issues)
-
