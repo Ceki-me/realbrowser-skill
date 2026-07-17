@@ -19,6 +19,40 @@ when_to_use: An agent needs a real Chrome session — CAPTCHA/2FA bypass, anti-b
 
 ---
 
+## When to use this — and when NOT to
+
+### ✅ Appropriate use cases
+
+- **QA / E2E of your own web apps** — drive a real browser through user flows on a site you own
+- **Accessibility audits** of sites you are responsible for
+- **Synthetic monitoring** — heartbeat your own services
+- **Customer support automation** — actions in your own dashboards, on behalf of your own users with their consent
+- **Data collection** from public-record sites, open APIs presented as HTML, news — respecting `robots.txt` and ToS
+- **Auth-required flows** on accounts you own (2FA, password manager fills, session cookies)
+
+### ❌ NOT appropriate — ever
+
+- Sites you don't own and whose ToS don't permit automated access
+- Account creation on services other than your own
+- Filling forms with data that isn't yours or isn't accurate
+- Bypassing access controls, login walls, age gates, or paywalls
+- Banking / KYC / payments under another identity
+- Anything that violates local law where you, the host, or the target operates
+
+**If unsure: don't use it, ask first.**
+
+### Privacy and visibility
+
+| You're in this mode | The host sees | You should know |
+|---------------------|---------------|-----------------|
+| **Self** (your browser) | Nothing — it's your own machine | Standard browser visibility |
+| **Marketplace** (renting) | Everything your agent does — screen, navigation, keystrokes, chat | Do NOT enter personal credentials, payment data, or private content |
+| **Earn** (hosting) | Only the renter's session (sandboxed incognito profile) | Your other tabs and passwords are invisible |
+
+> **Screenshots and chat messages are visible** to the host (marketplace) and to the renter (earn). The server does not retain cookies or storage between rentals. If you need persistence, use `ceki profile export/import` locally.
+
+---
+
 ## Pre-flight — run before EVERY rent
 
 Do NOT jump straight to `ceki rent`. Walk through these steps in order.
@@ -76,14 +110,26 @@ curl -s -H "Authorization: Bearer $CEKI_API_KEY" \
 
 This skill works in **two modes**, controlled by how you configure it:
 
-| Mode | When to use | How |
-|------|-------------|-----|
-| **Self** | You own the browser schedules (pre-arranged). Env-driven: `CEKI_RENT_SCHEDULES` + `CEKI_TOKEN` | Set env vars, then `ceki rent --schedule <id>` |
-| **Marketplace** | No pre-arranged schedules; rent public Chrome sessions from other providers. Pay per minute. | `CEKI_RENT_SCHEDULES` empty → leaves `ceki search` as fallback |
+| Mode | What it does | Cost | Setup |
+|------|-------------|------|-------|
+| **Self** | Your own Chrome via Ceki extension. Free when host == renter. | Free | Install extension from [browser.ceki.me/install](https://browser.ceki.me/install) |
+| **Marketplace** | Rent a Chrome from an opted-in host. You see their browser; they see your session. | ~$0.03/min, USDC | `ceki search` → `ceki rent --schedule <id>` |
+| **Earn** (opt-in) | Share your idle Chrome so other agents can rent it. Off by default. | You receive 90% of session price | Toggle on in ceki.me dashboard → Earn |
+| **Auto** (env-driven) | Try Self first with pre-arranged schedule IDs; fall back to Marketplace if none available or all busy. | Varies | `CEKI_RENT_SCHEDULES` env var → scripted loop in CLI quickstart |
 
 ---
 
 ## SDK installation
+
+### Via clawhub (Claude Code / Cline / Cursor)
+
+```bash
+clawhub skill install realbrowser
+```
+
+This copies the skill to your agent workspace and sets up the recommended permissions.
+
+### Via pip / npm
 
 ```bash
 pip install --upgrade ceki-sdk --break-system-packages   # >=2.18.0
@@ -200,11 +246,19 @@ ceki stop $SID
 
 **Rule: fill every field via `ceki type <sid> "text" --natural`.** This is the only reliable path.
 
+### Input modes
+
+| Flag | Effect | When to use |
+|------|--------|-------------|
+| `--natural` (recommended) | Human-like typing with pauses between keystrokes, anti-bot resistant | Every normal form fill |
+| *(no flag)* | Uses the default human profile (env `CEKI_HUMAN_PROFILE` or `natural` preset) | When you've set a custom profile or don't need --natural's extra delays |
+| `--no-human` / `--raw` | Sends text instantly as one CDP packet — no pauses, no humanizer | Bulk data entry, pasting long text, filling hidden fields |
+
 ### Why `type` and not a CDP value-setter
 
-- `ceki type --natural` sends real `keydown/keypress/keyup` events (`Input.dispatchKeyEvent`). React's `_valueTracker` fires, Vue's `v-model` catches the `input` event — the field genuinely fills.
+- `ceki type` (with any flag) sends real `keydown/keypress/keyup` events (`Input.dispatchKeyEvent`). React's `_valueTracker` fires, Vue's `v-model` catches the `input` event — the field genuinely fills.
 - A CDP value-setter (`Runtime.evaluate el.value = "x"`) puts text on screen but **does NOT trigger framework state**. React stays "empty," Vue misses `v-model` → form submit silently fails with "required."
-- `--natural` adds pauses between keystrokes — human-like timing, less anti-bot suspicion.
+- `--natural` adds jitter between keystrokes — human-like timing, less anti-bot suspicion.
 
 ### When you MUST blur after type
 
@@ -270,7 +324,7 @@ If native also returns `session_not_found` (exit 3) — yes, the rental is over.
 | `screenshot <sid>` | `-o PATH [--full]` | raw PNG/JPEG |
 | `navigate <sid> <url>` | — | `{"ok": true}` |
 | `click <sid> <x> <y>` | — | `{"ok": true}` |
-| `type <sid> "<text>"` | `--natural` | `{"ok": true}` |
+| `type <sid> "<text>"` | `[--natural] [--no-human\|--raw]` | `{"ok": true}` |
 | `scroll <sid> <x> <y> <dy>` | — | `{"ok": true}` |
 | `switch-tab <sid>` | — | closes previous, activates new |
 | `configure <sid>` | `[--masking-mode true\|false]` | `{"ok": true}` |
@@ -548,4 +602,4 @@ Available filters: `geo`, `language`, `price_per_min`, `rating`, `online`, `prof
 
 - `reference/methods.md` — full JSON-RPC method reference
 - `reference/pricing.md` — pricing details
-- `examples/` — Python and TypeScript examples
+- `examples/` — quickstarts (Python, TypeScript, IDE configs) and full examples
