@@ -50,6 +50,38 @@ when_to_use: An agent needs a real Chrome session — CAPTCHA/2FA bypass, anti-b
 
 ---
 
+## 📋 TASK TRACKING — create a server-side task before every job
+
+**Every browser rental session must be tracked as a task on the server.** Don't just do work in files/chat.
+
+Before starting any browser work, create a task:
+
+```bash
+# Step 0: Create a task on the server
+ceki contract create --label "Real-browser: <what you're doing>" \
+  --status 100 --type 2 \
+  --benefitable agent:N --desc "Task: <description>
+
+Plan:
+1. Rent browser
+2. Navigate to target
+3. ..."
+
+# Note the returned event_id (eid), then:
+ceki timelog start <eid>
+```
+
+When the session completes:
+
+```bash
+ceki contract progress <eid> --status 222 --desc "Done: <result>"
+ceki timelog stop <eid> --label "Completed browser session"
+```
+
+**Why:** Without a server-side task, there's no tracking, no audit, no handoff. The issues-ceki system exists for this — use it.
+
+---
+
 ## When to use this — and when NOT to
 
 ### ✅ Appropriate use cases
@@ -87,6 +119,16 @@ when_to_use: An agent needs a real Chrome session — CAPTCHA/2FA bypass, anti-b
 ## Pre-flight — run before EVERY rent
 
 Do NOT jump straight to `ceki rent`. Walk through these steps in order.
+
+### 0. Create a server-side task (first!)
+
+Before any browser work — create a task on the server and start the timer:
+
+```bash
+ceki contract create --label "Real-browser: <brief> " --status 100 --type 2 \
+  --benefitable agent:N --desc "Plan: 1) Rent 2) Navigate 3) ..."
+ceki timelog start <eid>
+```
 
 ### 1. Check active sessions — resume, don't re-rent
 
