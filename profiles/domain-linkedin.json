@@ -3,7 +3,7 @@
   "label": "LinkedIn — Professional Profile Browser",
   "emoji": "💼",
   "domain": "linkedin.com",
-  "description": "Extracted from: joeyism/linkedin_scraper v3 (Playwright), ManiMozaffar/linkedIn-scraper, ed-word/Linkedin-Scraper. Verified 2026-07-16: 1570px login page ('Войти или зарегистрироваться'). Requires auth for any profile/feed content.",
+  "description": "Extracted from: joeyism/linkedin_scraper v3 (Playwright), ManiMozaffar/linkedIn-scraper, ed-word/Linkedin-Scraper, ceki-marketing session analysis (158 mentions — most scraped domain). Verified 2026-07-16: 1570px login page ('Войти или зарегистрироваться'). HARD phone-gate — SMS required for registration. OAuth bypass (Google/MS) is THEORETICAL — requires a Google account which itself has phone-gate. Realistically: LinkedIn requires phone. Requires auth for any profile/feed content. Heavy lazy-loading — must scroll full height to trigger all sections.",
   "source_patterns": [
     "Profile page: must scroll full height to trigger lazy-loaded sections",
     "Scroll speed: slow, deliberate. 2-4s pause per section (reading)",
@@ -63,8 +63,25 @@
     "login": {
       "pre_login_pause_ms": 3000,
       "field_pause_ms": { "min": 500, "max": 1200 },
-      "post_login_wait_ms": { "min": 5000, "max": 8000 }
+      "post_login_wait_ms": { "min": 5000, "max": 8000 },
+      "note": "HARD phone-gate. SMS required for registration. OAuth via Google/MS is theoretically possible but requires a Google account — which itself has phone-gate. Realistically: assume phone required. Use existing logged-in sessions when possible (profile export/import).",
+      "bypass_strategy": {
+        "primary": "OAuth via Google (Continue with Google) — requires pre-existing Google account",
+        "alternate": "OAuth via Microsoft (Continue with Microsoft) — same constraint",
+        "reliability": "UNRELIABLE — depends on Google/MS account creation without phone, which is IP-dependent lottery",
+        "recommended_approach": "If you already HAVE a Google/MS account: use OAuth. If not: direct phone registration is the only reliable path."
+      }
     },
-    "sequence_hint": "navigate profile → scroll top-to-bottom (3 passes, 2-4s pauses) → click 'See more' on sections → scroll again → click Connect/Message → type → send"
+    "cdp_interaction_pattern": {
+      "description": "LinkedIn is a React SPA. Use Runtime.evaluate with nativeValueSetter for form fields, not Playwright fill().",
+      "value_setter": "Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set.call(el, val); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));",
+      "click_strategy": "Use text-content matching for buttons when selectors fail: [...document.querySelectorAll('button')].find(e => e.textContent.includes('Connect'))?.click()"
+    },
+    "rate_limits": {
+      "connection_requests": "~100/week for new accounts, enforced by 'Connect' button greying out",
+      "search_views": "~25/page view (sales nav)",
+      "profile_views": "~100/24h before 'This profile has been viewed by someone in your network' warning"
+    },
+    "sequence_hint": "navigate linkedin.com → if not logged in: try OAuth (Google/MS) if you have an existing account, else phone registration → navigate profile → scroll top-to-bottom (3 passes, 2-4s pauses) → click 'See more' with text-fallback → scroll again → click Connect/Message via text-content matching → type note → send"
   }
 }

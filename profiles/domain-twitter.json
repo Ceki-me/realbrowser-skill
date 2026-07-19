@@ -3,7 +3,7 @@
   "label": "Twitter/X — Timeline & Trend Browser",
   "emoji": "🐦",
   "domain": "twitter.com, x.com",
-  "description": "Extracted from: proxidize/x-scraper, ScrapeClaw twitter-scraper, hermes-agent X-reader spec. Verified 2026-07-16: 6190px landing page with login gate (Continue with phone/Google/Apple). Login required for timeline content. Russian locale by default.",
+  "description": "Extracted from: proxidize/x-scraper, ScrapeClaw twitter-scraper, hermes-agent X-reader spec, ceki-session analysis (101 mentions across agents). Verified 2026-07-16: 6190px landing page with login gate (Continue with phone/Google/Apple). Login required for timeline content. Russian locale by default. Phone-gate: sometimes required for registration (IP-dependent), but often email-only works. OAuth via Google/Apple available.",
   "source_patterns": [
     "Timeline: fast vertical scroll, 1-2 tweets visible at a time",
     "Pause 1-3s per tweet cluster (reading)",
@@ -56,7 +56,8 @@
     "login": {
       "pre_login_pause_ms": 1500,
       "field_pause_ms": { "min": 400, "max": 900 },
-      "post_login_wait_ms": { "min": 3000, "max": 6000 }
+      "post_login_wait_ms": { "min": 3000, "max": 6000 },
+      "note": "Phone sometimes required for new accounts (bot suspicion). If phone gate appears — try OAuth with Google/Apple instead of email+password. Existing sessions rarely hit phone-gate on login, only on registration."
     },
     "sequence_hint": "navigate timeline → scroll 3-5 passes → pause on interesting tweet → click expand → read → like | reply → scroll more"
   }
