@@ -6,7 +6,7 @@
     "pip": "ceki-sdk",
     "npm": "@ceki/sdk",
     "env": {
-      "CEKI_API_KEY": "Get from https://ceki.me/dashboard"
+      "CEKI_API_KEY": "Get from https://ceki.me/dashboard/agents"
     }
   }
 }
